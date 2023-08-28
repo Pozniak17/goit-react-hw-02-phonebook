@@ -4,6 +4,9 @@ import { ContactForm } from './ContactForm/ContactForm';
 import { Filter } from './Filter/Filter';
 import { ContactList } from './ContactList/ContactList';
 
+import { GlobalStyle } from './GlobalStyle.styled';
+import { Layout } from './Layout.styled';
+
 export class App extends Component {
   state = {
     contacts: [
@@ -22,9 +25,14 @@ export class App extends Component {
       number,
     };
 
-    this.setState(prevState => ({
-      contacts: [contact, ...prevState.contacts],
-    }));
+    this.setState(prevState => {
+      if (prevState.contacts.some(contact => contact.name === name)) {
+        return alert(`${contact.name} is already in contacts`);
+      }
+      return {
+        contacts: [contact, ...prevState.contacts],
+      };
+    });
   };
 
   handleChangeFilter = event => {
@@ -40,20 +48,26 @@ export class App extends Component {
     );
   };
 
-  render() {
-    const { contacts, filter } = this.state;
+  deleteContact = contactId => {
+    this.setState(prevState => ({
+      contacts: prevState.contacts.filter(contact => contact.id !== contactId),
+    }));
+  };
 
+  render() {
+    const { filter } = this.state;
     const visibleTodos = this.getVisibleContacts();
     return (
-      <>
+      <Layout>
         <h1>Phonebook</h1>
         <ContactForm onSubmit={this.addContact} />
 
         <h2>Contacts</h2>
 
-        <Filter value={filter} onChange={this.handleChangeFilter} />
-        <ContactList contacts={visibleTodos} />
-      </>
+        <Filter value={filter} onSubmit={this.handleChangeFilter} />
+        <ContactList contacts={visibleTodos} onDelete={this.deleteContact} />
+        <GlobalStyle />
+      </Layout>
     );
   }
 }
